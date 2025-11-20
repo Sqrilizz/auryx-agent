@@ -1,5 +1,10 @@
 # 🔥 Auryx Agent
 
+[![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Sqrilizz/auryx-agent.svg)](https://github.com/Sqrilizz/auryx-agent/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/Sqrilizz/auryx-agent.svg)](https://github.com/Sqrilizz/auryx-agent/issues)
+
 > AI-powered CLI agent with access to 50+ AI models through YellowFire API
 
 Auryx Agent is a powerful command-line interface that brings AI capabilities directly to your terminal. Chat with GPT-5, Claude 4, Gemini, and many other models, execute system commands, perform network diagnostics, and automate your workflow - all from one place.
@@ -28,13 +33,13 @@ Auryx Agent is a powerful command-line interface that brings AI capabilities dir
 ### Quick Install
 
 ```bash
-pip install git+https://github.com/YOUR_USERNAME/auryx-agent.git
+pip install git+https://github.com/Sqrilizz/auryx-agent.git
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/auryx-agent.git
+git clone https://github.com/Sqrilizz/auryx-agent.git
 cd auryx-agent
 pip install -e .
 ```
@@ -229,10 +234,9 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ## 📞 Support
 
-- 🐛 [Report Issues](https://github.com/YOUR_USERNAME/auryx-agent/issues)
+- 🐛 [Report Issues](https://github.com/Sqrilizz/auryx-agent/issues)
 - 💬 [Telegram Bot](https://t.me/GPT4_Unlimit_bot)
-- 📧 Email: your.email@example.com
 
 ---
 
-Made with ❤️ by Auryx Team
+Made with ❤️ by sqrilizz

@@ -2,7 +2,7 @@
 name = "auryx-agent"
 version = "0.1.0"
 description = "AI-powered network diagnostic CLI agent"
-authors = ["Auryx Team"]
+authors = ["sqrilizz <sqrilizz@github.com>"]
 readme = "README.md"
 packages = [{include = "auryx_agent"}]
 
