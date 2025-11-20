@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "auryx-agent"
+version = "0.1.0"
+description = "AI-powered network diagnostic CLI agent"
+authors = ["Auryx Team"]
+readme = "README.md"
+packages = [{include = "auryx_agent"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.31.0"
+rich = "^13.7.0"
+prompt-toolkit = "^3.0.43"
+tomli = "^2.0.1"
+network-tools = {git = "https://github.com/Badim41/network_tools.git"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+hypothesis = "^6.92.0"
+pytest-mock = "^3.12.0"
+
+[tool.poetry.scripts]
+auryx-agent = "auryx_agent.__main__:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
