@@ -69,6 +69,9 @@ class YellowFireClient:
         "kimi-k2-thinking": "kimi-k2-thinking",
     }
     
+    # List of available models (for CLI convenience)
+    AVAILABLE_MODELS = list(MODEL_MAP.keys())
+    
     def __init__(self, api_key: str, default_model: str = "gpt-4o-mini"):
         """Initialize the YellowFire client."""
         if not api_key:
