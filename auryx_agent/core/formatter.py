@@ -324,3 +324,39 @@ class Formatter:
         """
         frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
         return f"{self.colors.BRIGHT_CYAN}{frames[frame % len(frames)]}{self.colors.RESET}"
+    
+    def render_markdown(self, text: str) -> str:
+        """Render simple markdown formatting in terminal.
+        
+        Args:
+            text: Text with markdown
+            
+        Returns:
+            Formatted text with ANSI colors
+        """
+        import re
+        
+        # Remove LaTeX formulas ($$...$$)
+        text = re.sub(r'\$\$[^$]+\$\$', '', text)
+        text = re.sub(r'\$[^$]+\$', '', text)
+        
+        # Bold: **text** or __text__
+        text = re.sub(r'\*\*(.+?)\*\*', f'{self.colors.BOLD}\\1{self.colors.RESET}', text)
+        text = re.sub(r'__(.+?)__', f'{self.colors.BOLD}\\1{self.colors.RESET}', text)
+        
+        # Italic: *text* or _text_
+        text = re.sub(r'\*(.+?)\*', f'{self.colors.DIM}\\1{self.colors.RESET}', text)
+        text = re.sub(r'_(.+?)_', f'{self.colors.DIM}\\1{self.colors.RESET}', text)
+        
+        # Inline code: `code`
+        text = re.sub(r'`(.+?)`', f'{self.colors.BRIGHT_YELLOW}\\1{self.colors.RESET}', text)
+        
+        # Headers: ## Header
+        text = re.sub(r'^### (.+)$', f'{self.colors.BRIGHT_CYAN}\\1{self.colors.RESET}', text, flags=re.MULTILINE)
+        text = re.sub(r'^## (.+)$', f'{self.colors.BRIGHT_BLUE}{self.colors.BOLD}\\1{self.colors.RESET}', text, flags=re.MULTILINE)
+        text = re.sub(r'^# (.+)$', f'{self.colors.BRIGHT_MAGENTA}{self.colors.BOLD}\\1{self.colors.RESET}', text, flags=re.MULTILINE)
+        
+        # Lists: - item or * item
+        text = re.sub(r'^[\-\*] (.+)$', f'{self.colors.BRIGHT_GREEN}•{self.colors.RESET} \\1', text, flags=re.MULTILINE)
+        
+        return text

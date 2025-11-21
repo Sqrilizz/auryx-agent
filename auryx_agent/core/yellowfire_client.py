@@ -15,62 +15,62 @@ class ChatMessage:
 class YellowFireClient:
     """Client for interacting with YellowFire API using network_tools."""
     
-    # Map model names to GptModels enum
-    MODEL_MAP = {
-        "gpt-5-1-high": "gpt-5-1-high",
-        "gpt-5-1": "gpt-5-1",
-        "gpt-5-high": "gpt-5-high",
-        "gpt-5": "gpt-5",
-        "gpt-5-mini": "gpt-5-mini",
-        "gpt-5-nano": "gpt-5-nano",
-        "gpt-5-chat-latest": "gpt-5-chat-latest",
-        "gpt-oss": "gpt-oss",
-        "gpt-4.5": "gpt-4.5",
-        "gpt-4.1": "gpt-4.1",
-        "gpt-4.1-mini": "gpt-4.1-mini",
-        "gpt-4.1-nano": "gpt-4.1-nano",
-        "gpt-4o": "gpt-4o",
-        "gpt-4o-mini": "gpt-4o-mini",
-        "gpt-3.5": "gpt-3.5",
-        "o4-mini": "o4-mini",
-        "o3-High": "o3-High",
-        "o3-mini": "o3-mini",
-        "o1": "o1",
-        "claude-4-5-sonnet": "claude-4-5-sonnet",
-        "claude-4-5-sonnet-thinking": "claude-4-5-sonnet-thinking",
-        "claude-4-opus": "claude-4-opus",
-        "claude-4-opus-thinking": "claude-4-opus-thinking",
-        "claude-4-1-opus": "claude-4-1-opus",
-        "claude-4-1-opus-thinking": "claude-4-1-opus-thinking",
-        "claude-4-sonnet": "claude-4-sonnet",
-        "claude-4-sonnet-thinking": "claude-4-sonnet-thinking",
-        "claude-3.7": "claude-3.7",
-        "claude-3.5-sonnet": "claude-3.5-sonnet",
-        "claude-3-opus": "claude-3-opus",
-        "claude-3-sonnet": "claude-3-sonnet",
-        "claude-3-haiku": "claude-3-haiku",
-        "gemini-3.0-pro": "gemini-3.0-pro",
-        "gemini-2.5-pro": "gemini-2.5-pro",
-        "gemini-2.5-flash": "gemini-2.5-flash",
-        "gemini-2.5-flash-lite": "gemini-2.5-flash-lite",
-        "gemini-2.0-flash-lite": "gemini-2.0-flash-lite",
-        "deepseek-r1": "deepseek-r1",
-        "deepseek-v3": "deepseek-v3",
-        "deepseek-v3.2": "deepseek-v3.2",
-        "deepseek-v3.2 thinking": "deepseek-v3.2 thinking",
-        "grok-4": "grok-4",
-        "grok-3": "grok-3",
-        "command-r-plus": "command-r-plus",
-        "command-a": "command-a",
-        "glm-4.6": "glm-4.6",
-        "reka-flash": "reka-flash",
-        "minimax-01": "minimax-01",
-        "minimax-02": "minimax-02",
-        "kimi-k2-thinking": "kimi-k2-thinking",
-    }
-    
-    # List of available models (for CLI convenience)
-    AVAILABLE_MODELS = list(MODEL_MAP.keys())
+    # Available models from YellowFire API (updated from error message)
+    AVAILABLE_MODELS = [
+        "gpt-5-1-high",
+        "gpt-5-1",
+        "gpt-5-high",
+        "gpt-5",
+        "gpt-5-mini",
+        "gpt-5-nano",
+        "gpt-5-chat-latest",
+        "gpt-oss",
+        "gpt-4-5",
+        "gpt-4-1",
+        "gpt-4-1-mini",
+        "gpt-4-1-nano",
+        "gpt-4o",
+        "chatgpt-4o",
+        "gpt-4o-mini",
+        "gpt-3-5",
+        "o4-mini",
+        "o3-high",
+        "o3-mini",
+        "o1",
+        "claude-4-5-sonnet",
+        "claude-4-5-sonnet-thinking",
+        "claude-4-1-opus",
+        "claude-4-opus",
+        "claude-4-sonnet",
+        "claude-4-1-opus-thinking",
+        "claude-4-opus-thinking",
+        "claude-4-sonnet-thinking",
+        "claude-3-7-sonnet-thinking",
+        "claude-3-5-sonnet",
+        "claude-3-opus",
+        "claude-3-sonnet",
+        "claude-3-haiku",
+        "command-r-plus",
+        "command-a",
+        "command-a-vision",
+        "c4ai-aya-vision-32b",
+        "deepseek-r1",
+        "deepseek-v3",
+        "deepseek-r1-0528-qwen3-8b",
+        "deepseek-v3.2",
+        "deepseek-v3.2-thinking",
+        "grok-4",
+        "grok-3",
+        "gemini-3-0-pro",
+        "gemini-2-5-pro",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-2.0-flash-lite",
+        "minimax-01",
+        "minimax-02",
+        "glm-4.6",
+        "kimi-k2-thinking",
+    ]
     
     def __init__(self, api_key: str, default_model: str = "gpt-4o-mini"):
         """Initialize the YellowFire client."""
@@ -84,11 +84,11 @@ class YellowFireClient:
     
     def list_models(self) -> List[str]:
         """List all available models."""
-        return list(self.MODEL_MAP.keys())
+        return self.AVAILABLE_MODELS
     
     def set_model(self, model_name: str) -> bool:
         """Set the active model."""
-        if model_name in self.MODEL_MAP:
+        if model_name in self.AVAILABLE_MODELS:
             self.current_model = model_name
             return True
         return False

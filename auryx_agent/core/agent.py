@@ -20,6 +20,12 @@ class Agent:
     
     SYSTEM_PROMPT = """You are Auryx, an advanced AI assistant with extensive capabilities.
 
+⚠️ FORMATTING RULES:
+- Use PLAIN TEXT only, NO LaTeX, NO math formulas ($$...$$)
+- Use simple markdown: **bold**, *italic*, `code`, lists
+- Format numbers simply: 7.98 GB, 48.1%, not $$\text{...}$$
+- Use emojis for visual appeal: ✓ ✗ 💾 🔍 ⚡ 📊
+
 🎯 Core Capabilities:
 - Code generation, review, refactoring, and debugging
 - File operations (read, write, search, compress)
@@ -72,7 +78,21 @@ class Agent:
 To use a tool, respond with JSON:
 {"tool": "tool_name", "args": {"arg1": "value1"}}
 
-After using a tool, explain the results naturally."""
+After using a tool, explain the results naturally.
+
+🧠 AUTOMATIC MEMORY:
+You MUST automatically remember important information about the user using memory_add tool:
+- User's name, location, profession, interests
+- User's preferences (programming languages, tools, frameworks)
+- Important facts about user's projects
+- User's goals and plans
+- Technical skills and experience level
+
+When you learn something important, use memory_add and mention it briefly at the end:
+"💾 Saved to memory: [brief description]"
+
+Categories: "preference", "fact", "context", "skill", "project"
+Importance: 1-10 (use 7-9 for important user info)"""
     
     def __init__(self, client: YellowFireClient, enable_memory: bool = True):
         """Initialize agent.
@@ -146,8 +166,13 @@ After using a tool, explain the results naturally."""
     def _memory_add(self, content: str, category: str = "fact", 
                     importance: int = 5, tags: List[str] = None) -> Dict[str, Any]:
         """Add memory wrapper."""
+        # Check for duplicates
+        existing = self.memory.search(content, limit=1)
+        if existing and existing[0].content.lower() == content.lower():
+            return {"success": False, "error": "Memory already exists", "content": content}
+        
         memory_id = self.memory.add(content, category, importance, tags or [])
-        return {"success": True, "memory_id": memory_id, "content": content}
+        return {"success": True, "memory_id": memory_id, "content": content, "category": category}
     
     def _memory_search(self, query: str, limit: int = 5) -> Dict[str, Any]:
         """Search memory wrapper."""
@@ -174,20 +199,24 @@ After using a tool, explain the results naturally."""
         Returns:
             Final response to user
         """
-        # Add system prompt to history if empty
-        if not self.client.chat_history:
-            from auryx_agent.core.yellowfire_client import ChatMessage
-            system_prompt = self.SYSTEM_PROMPT
-            
-            # Add memory context if available
-            if self.memory:
-                memory_context = self.memory.get_context_summary()
-                if memory_context and memory_context != "No memories stored yet.":
-                    system_prompt += f"\n\n📝 Remembered Context:\n{memory_context}"
-            
-            self.client.chat_history.append(
-                ChatMessage(role="system", content=system_prompt)
-            )
+        from auryx_agent.core.yellowfire_client import ChatMessage
+        
+        # Build system prompt with current memory context
+        system_prompt = self.SYSTEM_PROMPT
+        
+        # Add memory context if available
+        if self.memory:
+            memory_context = self.memory.get_context_summary()
+            if memory_context and memory_context != "No memories stored yet.":
+                system_prompt += f"\n\n📝 Remembered Context:\n{memory_context}"
+        
+        # Update or add system prompt
+        if self.client.chat_history and self.client.chat_history[0].role == "system":
+            # Update existing system prompt with fresh memory
+            self.client.chat_history[0] = ChatMessage(role="system", content=system_prompt)
+        else:
+            # Add new system prompt
+            self.client.chat_history.insert(0, ChatMessage(role="system", content=system_prompt))
         
         conversation = f"User: {user_input}\n\n"
         

@@ -187,6 +187,13 @@ def simple_chat():
                     
                     if agent.memory:
                         text = user_input[10:].strip()  # Remove "/remember "
+                        
+                        # Check for duplicates
+                        existing = agent.memory.search(text, limit=1)
+                        if existing and existing[0].content.lower() == text.lower():
+                            print(fmt.warning("This memory already exists"))
+                            continue
+                        
                         memory_id = agent.memory.add(text, category="user_note", importance=7)
                         print(fmt.success(f"Remembered: {text[:60]}..."))
                     else:
@@ -266,7 +273,10 @@ def simple_chat():
                 
                 loading = False
                 spinner_thread.join(timeout=0.2)
-                print(response)
+                
+                # Render markdown formatting
+                formatted_response = fmt.render_markdown(response)
+                print(formatted_response)
             except Exception as e:
                 loading = False
                 spinner_thread.join(timeout=0.2)
