@@ -15,15 +15,15 @@ class ChatMessage:
 class YellowFireClient:
     """Client for interacting with YellowFire API using network_tools."""
     
-    # Available models from YellowFire API (updated from error message)
+    # Available models from YellowFire API (tested and working)
     AVAILABLE_MODELS = [
         "gpt-5-1-high",
         "gpt-5-1",
         "gpt-5-high",
         "gpt-5",
         "gpt-5-mini",
-        "gpt-5-nano",
-        "gpt-5-chat-latest",
+        # "gpt-5-nano",  # Error: Unknown error in process GPT
+        # "gpt-5-chat-latest",  # Error: Unsupported model
         "gpt-oss",
         "gpt-4-5",
         "gpt-4-1",
@@ -32,7 +32,7 @@ class YellowFireClient:
         "gpt-4o",
         "chatgpt-4o",
         "gpt-4o-mini",
-        "gpt-3-5",
+        # "gpt-3-5",  # Error: Unknown error in process GPT
         "o4-mini",
         "o3-high",
         "o3-mini",
@@ -56,7 +56,7 @@ class YellowFireClient:
         "c4ai-aya-vision-32b",
         "deepseek-r1",
         "deepseek-v3",
-        "deepseek-r1-0528-qwen3-8b",
+        # "deepseek-r1-0528-qwen3-8b",  # Error: Unknown error in process GPT
         "deepseek-v3.2",
         "deepseek-v3.2-thinking",
         "grok-4",
@@ -64,15 +64,15 @@ class YellowFireClient:
         "gemini-3-0-pro",
         "gemini-2-5-pro",
         "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
+        # "gemini-2.5-flash-lite",  # Error: Unknown error in process GPT
         "gemini-2.0-flash-lite",
-        "minimax-01",
+        # "minimax-01",  # Error: Unknown error in process GPT
         "minimax-02",
         "glm-4.6",
         "kimi-k2-thinking",
     ]
     
-    def __init__(self, api_key: str, default_model: str = "gpt-4o-mini"):
+    def __init__(self, api_key: str, default_model: str = "command-a"):
         """Initialize the YellowFire client."""
         if not api_key:
             raise ValueError("YellowFire API key cannot be empty")
@@ -120,6 +120,9 @@ class YellowFireClient:
             if use_history:
                 self.chat_history.append(ChatMessage(role="user", content=prompt))
                 self.chat_history.append(ChatMessage(role="assistant", content=generated_text))
+                
+                # Auto-trim history to prevent context overflow
+                self.trim_history(max_messages=20)
             
             return generated_text
             
@@ -129,6 +132,33 @@ class YellowFireClient:
     def clear_history(self) -> None:
         """Clear chat history."""
         self.chat_history.clear()
+    
+    def trim_history(self, max_messages: int = 20) -> None:
+        """Trim chat history to keep only recent messages.
+        
+        Args:
+            max_messages: Maximum number of messages to keep (excluding system prompt)
+        """
+        if not self.chat_history:
+            return
+        
+        # Keep system prompt if it exists
+        system_prompt = None
+        messages = self.chat_history
+        
+        if messages and messages[0].role == "system":
+            system_prompt = messages[0]
+            messages = messages[1:]
+        
+        # Keep only last N messages
+        if len(messages) > max_messages:
+            messages = messages[-max_messages:]
+        
+        # Rebuild history
+        self.chat_history.clear()
+        if system_prompt:
+            self.chat_history.append(system_prompt)
+        self.chat_history.extend(messages)
     
     def get_balance(self, timeout: int = 10) -> float:
         """Get current account balance."""

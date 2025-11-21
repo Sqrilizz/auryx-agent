@@ -20,6 +20,15 @@ class Agent:
     
     SYSTEM_PROMPT = """You are Auryx, an advanced AI assistant with extensive capabilities.
 
+🚨 CRITICAL RULE - NO HALLUCINATIONS:
+- NEVER invent or fabricate data, system information, or command outputs
+- ALWAYS use tools to get real data from the system
+- If user asks for system info (neofetch, disk usage, processes, etc.) - USE THE TOOL
+- If you don't have a tool for something - SAY SO, don't make up data
+- Example: User asks "show neofetch" → Use execute_command tool with "neofetch"
+- Example: User asks "disk usage" → Use get_disk_usage tool
+- VIOLATION: Making up fake system specs, fake command outputs, fake file contents
+
 ⚠️ FORMATTING RULES:
 - Use PLAIN TEXT only, NO LaTeX, NO math formulas ($$...$$)
 - Use simple markdown: **bold**, *italic*, `code`, lists
@@ -189,6 +198,59 @@ Importance: 1-10 (use 7-9 for important user info)"""
         context = self.memory.get_context_summary()
         return {"success": True, "context": context}
     
+    def _detect_hallucination_risk(self, user_input: str, response: str) -> bool:
+        """Detect if response might contain hallucinated data.
+        
+        Args:
+            user_input: User's original question
+            response: AI's response
+            
+        Returns:
+            True if hallucination risk detected
+        """
+        # Keywords that indicate user wants real system data
+        system_info_keywords = [
+            'neofetch', 'system info', 'disk usage', 'disk space', 'memory', 'cpu', 'processes',
+            'running', 'network', 'connections', 'files', 'directory', 'ls',
+            'ps', 'top', 'df', 'free', 'ifconfig', 'ip addr', 'netstat',
+            'uname', 'hostname', 'uptime', 'who', 'w', 'last', 'kernel'
+        ]
+        
+        # Check if user is asking for system info
+        user_lower = user_input.lower()
+        asking_for_system_info = any(keyword in user_lower for keyword in system_info_keywords)
+        
+        if not asking_for_system_info:
+            return False
+        
+        # Check if response contains data without tool call
+        # If response has specific numbers/paths but no tool was used, it's likely hallucinated
+        has_specific_data = any([
+            'GB' in response or 'MB' in response or 'KB' in response or 'TB' in response,
+            'CPU:' in response or 'Memory:' in response,
+            'Kernel:' in response or 'OS:' in response,
+            '/dev/' in response or '/home/' in response,
+            'PID' in response and 'USER' in response,
+        ])
+        
+        # Check if agent is making excuses instead of using tools
+        excuse_phrases = [
+            'слишком много данных',
+            'не может быть полностью отображён',
+            'ограничений',
+            'обычно neofetch отображает',
+            'если вам нужно что-то конкретное',
+            'too much data',
+            'cannot be displayed',
+            'limitations',
+            'usually shows',
+            'if you need something specific',
+        ]
+        
+        making_excuses = any(phrase.lower() in response.lower() for phrase in excuse_phrases)
+        
+        return has_specific_data or making_excuses
+    
     def process(self, user_input: str, max_iterations: int = 5) -> str:
         """Process user input with tool support.
         
@@ -228,6 +290,14 @@ Importance: 1-10 (use 7-9 for important user info)"""
             tool_call = self._extract_tool_call(response)
             
             if not tool_call:
+                # Check for potential hallucination before returning
+                if self._detect_hallucination_risk(user_input, response):
+                    # Force agent to use tools
+                    warning = "\n\n⚠️ WARNING: You provided specific system data without using tools. This is likely fabricated. Please use the appropriate tool to get real data."
+                    conversation += f"Assistant (REJECTED): {response}\n{warning}\n\n"
+                    user_input = f"You must use a tool to answer this question. Do not fabricate data. {user_input}"
+                    continue
+                
                 # No tool call, return response
                 return response
             
@@ -240,10 +310,17 @@ Importance: 1-10 (use 7-9 for important user info)"""
             
             try:
                 result = self.tools[tool_name](**tool_args)
-                conversation += f"Tool: {tool_name}\nArgs: {json.dumps(tool_args)}\nResult: {json.dumps(result, indent=2)}\n\n"
                 
-                # Continue conversation with tool result
-                user_input = f"Tool result: {json.dumps(result)}\nPlease explain this to the user."
+                # Limit result size to prevent context overflow
+                result_str = json.dumps(result, indent=2)
+                max_result_size = 5000  # characters
+                if len(result_str) > max_result_size:
+                    result_str = result_str[:max_result_size] + f"\n... (truncated, {len(result_str) - max_result_size} chars omitted)"
+                
+                conversation += f"Tool: {tool_name}\nArgs: {json.dumps(tool_args)}\nResult: {result_str}\n\n"
+                
+                # Continue conversation with tool result (also truncated)
+                user_input = f"Tool result: {result_str}\nPlease explain this to the user."
             except Exception as e:
                 return f"Error executing tool: {str(e)}"
         
