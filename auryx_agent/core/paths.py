@@ -46,9 +46,27 @@ def get_plugins_dir() -> Path:
     return get_config_dir() / "plugins"
 
 
+def get_data_dir() -> Path:
+    """Get the data directory based on the operating system.
+    
+    Returns:
+        Path to data directory:
+        - Linux/macOS: ~/.local/share/auryx-agent/
+        - Windows: %APPDATA%/auryx-agent/data/
+    """
+    if sys.platform == "win32":
+        # Windows: use APPDATA/data
+        appdata = Path.home() / "AppData" / "Roaming"
+        return appdata / "auryx-agent" / "data"
+    else:
+        # Linux/macOS: use XDG data directory
+        return Path.home() / ".local" / "share" / "auryx-agent"
+
+
 def ensure_config_dirs() -> None:
     """Create all necessary configuration directories if they don't exist."""
     get_config_dir().mkdir(parents=True, exist_ok=True)
     get_reports_dir().mkdir(parents=True, exist_ok=True)
     get_logs_dir().mkdir(parents=True, exist_ok=True)
     get_plugins_dir().mkdir(parents=True, exist_ok=True)
+    get_data_dir().mkdir(parents=True, exist_ok=True)

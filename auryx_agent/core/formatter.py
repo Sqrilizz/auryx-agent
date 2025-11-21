@@ -57,17 +57,108 @@ class Formatter:
     def logo(self) -> str:
         """Return ASCII art logo with colors."""
         logo = f"""
-{self.colors.BRIGHT_CYAN}{self.colors.BOLD}
-    ___                           
-   /   | __  ___________  ___  __
-  / /| |/ / / / ___/ __ \\/ / |/ /
- / ___ / /_/ / /  / /_/ /|   /  
-/_/  |_\\__,_/_/   \\____/_/|_|   
-{self.colors.RESET}                                 
-{self.colors.BRIGHT_MAGENTA}Network Diagnostic AI Agent{self.colors.RESET}
-{self.colors.DIM}Powered by YellowFire API{self.colors.RESET}
+{self.colors.BRIGHT_CYAN}{self.colors.BOLD}    _                       
+   / \\  _   _ _ __ _   ___  __
+  / _ \\| | | | '__| | | \\ \\/ /
+ / ___ \\ |_| | |  | |_| |>  < 
+/_/   \\_\\__,_|_|   \\__, /_/\\_\\{self.colors.RESET} {self.colors.BRIGHT_MAGENTA}v0.2.0{self.colors.RESET}
+{self.colors.DIM}                    |___/          {self.colors.RESET}
+{self.colors.BRIGHT_WHITE}AI Agent with Memory & Web Access{self.colors.RESET}
 """
         return logo
+    
+    def tool_badge(self, tool_name: str) -> str:
+        """Format tool name as a badge.
+        
+        Args:
+            tool_name: Tool name
+            
+        Returns:
+            Formatted tool badge
+        """
+        icons = {
+            "code": "💻",
+            "web": "🌐",
+            "network": "📡",
+            "file": "📁",
+            "system": "🖥️",
+            "memory": "🧠",
+            "git": "🔧"
+        }
+        
+        # Determine icon based on tool name
+        icon = "🔧"
+        for key, val in icons.items():
+            if key in tool_name.lower():
+                icon = val
+                break
+        
+        return f"{icon} {self.colors.BRIGHT_YELLOW}{tool_name}{self.colors.RESET}"
+    
+    def progress_bar(self, current: int, total: int, width: int = 30) -> str:
+        """Create a progress bar.
+        
+        Args:
+            current: Current progress
+            total: Total items
+            width: Width of progress bar
+            
+        Returns:
+            Formatted progress bar
+        """
+        if total == 0:
+            percent = 0
+        else:
+            percent = int((current / total) * 100)
+        
+        filled = int((current / total) * width) if total > 0 else 0
+        bar = "█" * filled + "░" * (width - filled)
+        
+        return f"{self.colors.BRIGHT_CYAN}[{bar}]{self.colors.RESET} {percent}%"
+    
+    def box(self, text: str, width: int = 60, title: str = "") -> str:
+        """Create a box around text.
+        
+        Args:
+            text: Text to box
+            width: Box width
+            title: Optional title
+            
+        Returns:
+            Formatted box
+        """
+        import re
+        
+        def visible_length(s: str) -> int:
+            """Get visible length of string (excluding ANSI codes)."""
+            ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+            return len(ansi_escape.sub('', s))
+        
+        lines = text.split('\n')
+        
+        # Top border
+        if title:
+            title_text = f" {title} "
+            padding = (width - len(title_text)) // 2
+            top = f"╭{'─' * padding}{title_text}{'─' * (width - padding - len(title_text))}╮"
+        else:
+            top = f"╭{'─' * width}╮"
+        
+        # Content
+        content = []
+        for line in lines:
+            visible_len = visible_length(line)
+            padding_needed = width - visible_len - 2  # -2 for borders
+            if padding_needed < 0:
+                padding_needed = 0
+            padded = line + ' ' * padding_needed
+            content.append(f"│ {padded} │")
+        
+        # Bottom border
+        bottom = f"╰{'─' * width}╯"
+        
+        result = [top] + content + [bottom]
+        return '\n'.join(result)
     
     def header(self, text: str, width: int = 70) -> str:
         """Format a header with borders.

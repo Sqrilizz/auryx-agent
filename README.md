@@ -2,12 +2,23 @@
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-0.2.0-orange.svg)](ROADMAP.md)
 [![GitHub stars](https://img.shields.io/github/stars/Sqrilizz/auryx-agent.svg)](https://github.com/Sqrilizz/auryx-agent/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/Sqrilizz/auryx-agent.svg)](https://github.com/Sqrilizz/auryx-agent/issues)
 
-> AI-powered CLI agent with access to 50+ AI models through YellowFire API
+> 🚀 Advanced AI agent with memory, web access, and code generation capabilities
 
-Auryx Agent is a powerful command-line interface that brings AI capabilities directly to your terminal. Chat with GPT-5, Claude 4, Gemini, and many other models, execute system commands, perform network diagnostics, and automate your workflow - all from one place.
+Auryx Agent is a powerful command-line AI assistant that brings advanced capabilities directly to your terminal. Chat with 50+ AI models, generate and review code, search the web, manage your system, and let it remember your preferences - all from one place.
+
+## 🎉 What's New in v0.2.0
+
+- 💻 **Code Generation & Review** - Create, analyze, and refactor code
+- 🌐 **Web Access** - Search the internet, download files, check weather
+- 🧠 **Long-term Memory** - Agent remembers your preferences and context
+- 🖥️ **Advanced System Control** - Process management, resource monitoring
+- 🎨 **Enhanced UI** - Beautiful output with colors and icons
+
+[📖 Read Full v0.2.0 Features](FEATURES_v0.2.md) | [🇷🇺 Русская версия](README.ru.md)
 
 ## ✨ Features
 
@@ -17,16 +28,42 @@ Auryx Agent is a powerful command-line interface that brings AI capabilities dir
 - **Tool Mode**: AI can execute commands and interact with your system
 - **Session Management**: Save and load conversations
 
-### 🛠️ System Tools
-- **Command Execution**: Run shell commands directly from chat
-- **File Operations**: Read, write, and manage files
-- **Network Diagnostics**: Ping, DNS lookup, port scanning, traceroute
-- **System Information**: Get detailed system info
+### 💻 Code Capabilities (NEW!)
+- **Code Generation**: Create code in any language from descriptions
+- **Code Review**: Analyze code for bugs and improvements
+- **Refactoring**: Automated code refactoring
+- **Project Templates**: Quick scaffolding for Flask, FastAPI, CLI tools
+- **Git Integration**: Status, diff, and version control
+
+### 🌐 Web Access (NEW!)
+- **Web Search**: Search the internet using DuckDuckGo
+- **Page Fetching**: Download and analyze web pages
+- **File Downloads**: Download files from URLs
+- **Weather Info**: Get weather for any location
+- **Link Extraction**: Extract all links from web pages
+
+### 🧠 Long-term Memory (NEW!)
+- **Remembers Preferences**: Learns your coding style and preferences
+- **Context Retention**: Maintains context across sessions
+- **Smart Recall**: Search through stored memories
+- **Auto-learning**: Automatically remembers important information
+
+### 🖥️ Advanced System Control (NEW!)
+- **Process Management**: List, monitor, and kill processes
+- **Resource Monitoring**: CPU, RAM, disk usage tracking
+- **Network Connections**: View active connections
+- **File Operations**: Search, compress, extract archives
+- **System Monitoring**: Real-time resource monitoring
+
+### 🛠️ Network Tools
+- **Diagnostics**: Ping, DNS lookup, port scanning, traceroute
+- **System Information**: Detailed system info
+- **Command Execution**: Run shell commands directly
 
 ### 💰 Cost-Effective
 - **2x Cheaper** than official APIs for text models
-- **2x Cheaper** for image generation
 - **Free $1 Balance** to get started
+- **31+ Tools** available for automation
 
 ## 📦 Installation
 
@@ -86,6 +123,10 @@ auryx-agent chat
 /models                   # List all available models
 /info                     # Show current session info
 /tools                    # Toggle tool mode
+/memory                   # Show memory stats (NEW!)
+/remember <text>          # Add to memory (NEW!)
+/recall <query>           # Search memory (NEW!)
+/forget                   # Clear memory (NEW!)
 /save session.json        # Save conversation
 /load session.json        # Load conversation
 /exec ls -la             # Execute shell command
@@ -136,38 +177,58 @@ auryx-agent models search claude
 **Others:**
 - DeepSeek R1, V3, V3.2
 - Grok 3, Grok 4
-- Command R+, Reka Flash
+- Command R+,
 - Minimax-01/02, Kimi K2
 
-### Image Models
-- DALL-E 3
-- Stable Diffusion (Ultra, XL)
-- Flux Pro
-- Recraft V3
-- Kandinsky
 
 ## 💡 Examples
 
-### Chat with AI
+### Code Generation
 
 ```bash
-$ auryx-agent chat
-You: Explain quantum computing in simple terms
+You: Create a FastAPI app with user endpoints
 
-Auryx: Quantum computing uses quantum mechanics principles...
+Auryx: 💻 Creating FastAPI application...
+✓ Created main.py
+✓ Created requirements.txt
+✓ Added endpoints: GET /users, POST /users
 ```
 
-### Use Tools
+### Web Search
 
 ```bash
-You: /tools
-✓ Tool mode enabled
+You: Search for Python 3.12 new features
 
-You: Check if port 80 is open on localhost
+Auryx: 🌐 Searching the web...
+Found 5 results:
+1. Python 3.12 Release Notes - New features include...
+2. What's New in Python 3.12 - Performance improvements...
+```
 
-Auryx: Let me scan that for you...
-[Executes port scan]
-Port 80 is open on localhost.
+### Memory System
+
+```bash
+You: Remember that I prefer Python and FastAPI
+
+Auryx: ✓ Remembered your preferences
+
+[Later...]
+
+You: Create an API for a blog
+
+Auryx: Creating FastAPI application (as you prefer)...
+```
+
+### System Monitoring
+
+```bash
+You: Show system resources
+
+Auryx: 
+🖥️ System Resources:
+  CPU: 45% (8 cores)
+  RAM: 8.2 GB / 16 GB (51%)
+  Disk: 120 GB / 500 GB (24%)
 ```
 
 ### Network Diagnostics
@@ -239,4 +300,5 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 ---
 
-Made with ❤️ by sqrilizz
+**Author: sqrilizz**  
+Made with ❤️ for developers

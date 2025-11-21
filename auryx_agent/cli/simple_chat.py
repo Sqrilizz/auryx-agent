@@ -1,4 +1,8 @@
-"""Simple chat mode for testing."""
+"""Simple chat mode for testing.
+
+Author: sqrilizz
+GitHub: https://github.com/Sqrilizz/auryx-agent
+"""
 
 import sys
 import time
@@ -12,52 +16,36 @@ def simple_chat():
     """Run a simple chat session."""
     fmt = Formatter()
     
-    # Show logo
+    # Show compact logo
     print(fmt.logo())
     
     # Load configuration
-    print(fmt.info("Loading configuration..."))
     config = load_config()
     
     if not config.yellowfire_api_key:
-        print("\n" + fmt.error("YellowFire API key not configured!"))
-        print(fmt.info("Please add your API key to ~/.config/auryx-agent/config.toml"))
-        print(fmt.info("Get your free key: https://t.me/YellowFireBot -> /get_api"))
+        print(fmt.error("YellowFire API key not configured!"))
+        print(fmt.info("Add your key to ~/.config/auryx-agent/config.toml"))
+        print(fmt.info("Get free key: https://t.me/YellowFireBot -> /get_api"))
         return 1
     
     # Initialize client
-    print(fmt.info(f"Initializing AI client..."))
     client = YellowFireClient(
         api_key=config.yellowfire_api_key,
         default_model=config.default_model
     )
     
-    print("\n" + fmt.success("Ready!"))
-    print(fmt.key_value("Model", fmt.model_badge(client.current_model, True)))
-    print(fmt.key_value("Assistant", config.assistant_name))
-    if config.system_prompt:
-        print(fmt.key_value("Custom prompt", config.system_prompt[:50] + "..."))
-    print(fmt.key_value("Temperature", str(config.temperature)))
+    # Compact info box
+    print(fmt.box(
+        f"💻 Code  🌐 Web  🧠 Memory  🖥️ System  📡 Network\n"
+        f"/help commands  •  /models list  •  /memory stats\n"
+        f"{fmt.colors.DIM}by sqrilizz{fmt.colors.RESET}",
+        width=58,
+        title=""
+    ))
     
-    print(fmt.section("Commands", "💡"))
-    print(fmt.command("/model <name>", "Switch model"))
-    print(fmt.command("/models", "List available models"))
-    print(fmt.command("/info", "Show current model info"))
-    print(fmt.command("/clear", "Clear chat history"))
-    print(fmt.command("/tools", "Enable/disable tool mode"))
-    print(fmt.command("/save <file>", "Save conversation to file"))
-    print(fmt.command("/load <file>", "Load conversation from file"))
-    print(fmt.command("/exec <cmd>", "Execute shell command"))
-    print(fmt.command("/help", "Show this help"))
-    print(fmt.command("/quit or /exit", "Exit chat"))
-    
-    print(fmt.section("Capabilities", "🛠️"))
-    print("  • Execute shell commands")
-    print("  • Read/write files")
-    print("  • Network diagnostics")
-    print("  • System information")
-    
-    print("\n" + fmt.divider())
+    print(fmt.divider(60))
+    print(f"{fmt.colors.BRIGHT_MAGENTA}🤖 Chatting with {fmt.model_badge(client.current_model, True)}{fmt.colors.RESET}")
+    print(fmt.divider(60))
     
     # Initialize agent
     from auryx_agent.core.agent import Agent
@@ -176,6 +164,61 @@ def simple_chat():
                     print(fmt.key_value("Temperature", str(config.temperature)))
                     continue
                 
+                elif cmd == "/memory":
+                    if agent.memory:
+                        stats = agent.memory.stats()
+                        print(fmt.section("Memory Statistics", "🧠"))
+                        print(fmt.key_value("Total memories", str(stats['total'])))
+                        print(fmt.key_value("Average importance", str(stats['avg_importance'])))
+                        if stats['by_category']:
+                            print("\nBy category:")
+                            for cat, count in stats['by_category'].items():
+                                print(f"  • {cat}: {count}")
+                        if stats.get('most_accessed'):
+                            print(f"\nMost accessed: {stats['most_accessed'][:60]}...")
+                    else:
+                        print(fmt.warning("Memory system is disabled"))
+                    continue
+                
+                elif cmd == "/remember":
+                    if len(cmd_parts) < 2:
+                        print(fmt.warning("Usage: /remember <text>"))
+                        continue
+                    
+                    if agent.memory:
+                        text = user_input[10:].strip()  # Remove "/remember "
+                        memory_id = agent.memory.add(text, category="user_note", importance=7)
+                        print(fmt.success(f"Remembered: {text[:60]}..."))
+                    else:
+                        print(fmt.warning("Memory system is disabled"))
+                    continue
+                
+                elif cmd == "/recall":
+                    if len(cmd_parts) < 2:
+                        print(fmt.warning("Usage: /recall <query>"))
+                        continue
+                    
+                    if agent.memory:
+                        query = cmd_parts[1]
+                        results = agent.memory.search(query, limit=5)
+                        if results:
+                            print(fmt.section(f"Found {len(results)} memories", "🔍"))
+                            for mem in results:
+                                print(f"  [{mem.category}] {mem.content}")
+                        else:
+                            print(fmt.info("No memories found"))
+                    else:
+                        print(fmt.warning("Memory system is disabled"))
+                    continue
+                
+                elif cmd == "/forget":
+                    if agent.memory:
+                        agent.memory.clear()
+                        print(fmt.success("All memories cleared"))
+                    else:
+                        print(fmt.warning("Memory system is disabled"))
+                    continue
+                
                 elif cmd == "/help":
                     print(fmt.section("Available Commands", "💡"))
                     print(fmt.command("/model <name>", "Switch AI model"))
@@ -183,6 +226,10 @@ def simple_chat():
                     print(fmt.command("/info", "Show current model info"))
                     print(fmt.command("/clear", "Clear chat history"))
                     print(fmt.command("/tools", "Toggle tool mode"))
+                    print(fmt.command("/memory", "Show memory stats"))
+                    print(fmt.command("/remember <text>", "Add to memory"))
+                    print(fmt.command("/recall <query>", "Search memory"))
+                    print(fmt.command("/forget", "Clear all memories"))
                     print(fmt.command("/save <file>", "Save conversation"))
                     print(fmt.command("/load <file>", "Load conversation"))
                     print(fmt.command("/exec <cmd>", "Execute shell command"))
