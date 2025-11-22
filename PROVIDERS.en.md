@@ -5,11 +5,8 @@ Auryx Agent now supports multiple AI providers! Use models from different compan
 ## Supported Providers
 
 1. **YellowFire** (default) - 50+ models, 2x cheaper, free $1
-2. **OpenAI** - GPT-4o, GPT-4o-mini, o1
-3. **Anthropic** - Claude 3.5 Sonnet, Claude 3 Opus
-4. **Google** - Gemini 2.0 Flash, Gemini 1.5 Pro
-5. **Groq** - Llama 3.3, Mixtral (fastest inference)
-6. **Vercel** - Unified interface for multiple models
+2. **Google** - Gemini 2.0 Flash, Gemini 1.5 Pro
+3. **Groq** - Llama 3.3, Mixtral (fastest inference)
 
 ## Quick Start
 
@@ -58,11 +55,8 @@ auryx-agent chat
 | Provider | Price | Speed | Quality | Free Tier |
 |----------|-------|-------|---------|-----------|
 | YellowFire | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | $1 |
-| OpenAI | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | No |
-| Anthropic | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | No |
 | Google | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ | Yes |
 | Groq | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Yes |
-| Vercel | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | Varies |
 
 ## Recommendations
 
