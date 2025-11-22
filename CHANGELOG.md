@@ -2,7 +2,7 @@
 
 All notable changes to Auryx Agent will be documented in this file.
 
-## [0.2.1] - 2024-11-22
+## [0.2.1] - 2025-11-22
 
 ### 🌐 Multi-Provider Support
 
