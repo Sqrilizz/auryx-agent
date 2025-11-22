@@ -22,6 +22,12 @@ Auryx Agent is a powerful command-line AI assistant that brings advanced capabil
 
 ## ✨ Features
 
+### 🌐 Multi-Provider Support (NEW!)
+- **4 AI Providers**: YellowFire, OpenAI,Google, Groq,
+- **Easy Switching**: Change providers in config
+- **50+ Models**: Access models from different companies
+- **Flexible**: Use the best model for your task
+
 ### 🤖 Multi-Model AI Chat
 - **50+ AI Models**: GPT-5, Claude 4, Gemini 3.0, DeepSeek, Grok, and more
 - **Interactive Chat**: Natural conversation with context preservation
@@ -95,20 +101,80 @@ Get a free API key with $1 balance:
 Create config file at `~/.config/auryx-agent/config.toml`:
 
 ```toml
-[yellowfire]
-api_key = "your_api_key_here"
+# Choose your AI provider
+provider = "yellowfire"  # or: openai, anthropic, google, groq, vercel
 
-[agent]
-default_model = "gpt-4o-mini"
+# Default model
+default_model = "command-a"
+
+# API Keys
+[api_keys]
+yellowfire = "your_api_key_here"
+# Add other providers as needed:
+# openai = "sk-..."
+# anthropic = "sk-ant-..."
+# google = "AIza..."
+# groq = "gsk_..."
+
+[ai]
 assistant_name = "Auryx"
 temperature = 0.7
 ```
+
+**See [PROVIDERS.md](PROVIDERS.md) for all provider options!**
 
 ### 3. Start Chatting
 
 ```bash
 auryx-agent chat
 ```
+
+## � Usaing Different Providers
+
+### YellowFire (Default)
+
+YellowFire gives you access to **all models** through a single API:
+
+```bash
+# Just use the model name (no prefix needed)
+auryx-agent --model gpt-4o-mini
+auryx-agent --model claude-3-5-sonnet
+auryx-agent --model gemini-2-5-pro
+```
+
+**Why YellowFire?**
+- ✅ Access to 50+ models with one API key
+- ✅ 2x cheaper than official APIs
+- ✅ Free $1 to get started
+- ✅ No need to manage multiple API keys
+
+### Direct Provider APIs
+
+Use `provider:model` format to access APIs directly:
+
+```bash
+# Google AI API directly
+auryx-agent --model google:gemini-1.5-pro
+auryx-agent --model google:gemini-2.0-flash-exp
+
+# Groq API directly (fastest inference)
+auryx-agent --model groq:llama-3.3-70b-versatile
+auryx-agent --model groq:llama-3.1-8b-instant
+auryx-agent --model "groq:openai/gpt-oss-120b"
+auryx-agent --model "groq:meta-llama/llama-4-scout-17b-16e-instruct"
+
+# ⚠️ Важно: используйте кавычки для моделей с / в названии
+```
+
+**When to use direct APIs?**
+- Latest models not yet in YellowFire
+- Corporate/enterprise accounts
+- Provider-specific features
+- Need fastest inference (Groq)
+
+📖 **Full guides:** 
+- [PROVIDER_USAGE.md](PROVIDER_USAGE.md) - Подробное руководство по провайдерам
+- [MODELS.md](MODELS.md) - Полный список всех моделей с правильными именами
 
 ## 📖 Usage
 
@@ -119,19 +185,24 @@ auryx-agent chat
 auryx-agent chat
 
 # Chat commands:
-/model gpt-5              # Switch to GPT-5
-/models                   # List all available models
-/info                     # Show current session info
-/tools                    # Toggle tool mode
-/memory                   # Show memory stats (NEW!)
-/remember <text>          # Add to memory (NEW!)
-/recall <query>           # Search memory (NEW!)
-/forget                   # Clear memory (NEW!)
-/save session.json        # Save conversation
-/load session.json        # Load conversation
-/exec ls -la             # Execute shell command
-/help                     # Show all commands
-/quit                     # Exit
+/model gpt-5                        # Switch to GPT-5 (YellowFire)
+/model google:gemini-1.5-pro        # Switch to Google AI
+/model groq:llama-3.3-70b           # Switch to Groq
+/models                             # List current provider models
+/models yellowfire                  # List YellowFire models
+/models google                      # List Google AI models
+/models groq                        # List Groq models
+/info                               # Show session info & history
+/tools                              # Toggle tool mode
+/memory                             # Show memory stats (NEW!)
+/remember <text>                    # Add to memory (NEW!)
+/recall <query>                     # Search memory (NEW!)
+/forget                             # Clear memory (NEW!)
+/save session.json                  # Save conversation
+/load session.json                  # Load conversation
+/exec ls -la                        # Execute shell command
+/help                               # Show all commands
+/quit                               # Exit
 ```
 
 ### Direct Commands
@@ -149,11 +220,12 @@ auryx-agent dns github.com
 auryx-agent ports localhost
 auryx-agent traceroute 8.8.8.8
 
-# List all models
-auryx-agent models list
-
-# Search for models
-auryx-agent models search claude
+# Model management
+auryx-agent models list                    # All YellowFire models
+auryx-agent models search claude           # Search for models
+auryx-agent models provider yellowfire     # YellowFire models (50+)
+auryx-agent models provider google         # Google AI models
+auryx-agent models provider groq           # Groq models
 ```
 
 ## 🎯 Available Models
@@ -182,6 +254,59 @@ auryx-agent models search claude
 
 
 ## 💡 Examples
+
+### Using Different Providers
+
+```bash
+# YellowFire - access to all models (default)
+$ auryx-agent --model gpt-4o-mini
+🤖 Chatting with gpt-4o-mini
+
+# Google AI - direct API access
+$ auryx-agent --model google:gemini-1.5-pro
+✓ Будет использован GOOGLE API для модели gemini-1.5-pro
+🤖 Chatting with gemini-1.5-pro
+
+# Groq - fastest inference
+$ auryx-agent --model groq:llama-3.3-70b-versatile
+✓ Будет использован GROQ API для модели llama-3.3-70b-versatile
+🤖 Chatting with llama-3.3-70b-versatile
+
+# Switch providers in chat
+You: /model google:gemini-1.5-pro
+Auryx: ℹ Switching to GOOGLE provider...
+       ✓ Switched to gemini-1.5-pro (GOOGLE)
+```
+
+### Listing Provider Models
+
+```bash
+# List all YellowFire models (50+)
+$ auryx-agent models provider yellowfire
+📋 Модели провайдера YELLOWFIRE (47)
+🤖 GPT/OpenAI модели (16)
+🧠 Claude модели (13)
+💎 Gemini модели (4)
+...
+
+# List Google AI models
+$ auryx-agent models provider google
+📋 Модели провайдера GOOGLE (7)
+  • gemini-2.0-flash-exp
+  • gemini-1.5-pro
+  • gemini-1.5-flash
+  ...
+
+# List Groq models
+$ auryx-agent models provider groq
+📋 Модели провайдера GROQ (8)
+  • llama-3.3-70b-versatile
+  • llama-3.1-8b-instant
+  • meta-llama/llama-4-maverick-17b-128e-instruct
+  • qwen/qwen3-32b
+  • groq/compound
+  ...
+```
 
 ### Code Generation
 
@@ -247,18 +372,28 @@ PING google.com (142.250.185.46): 56 data bytes
 - Linux/Mac: `~/.config/auryx-agent/config.toml`
 - Windows: `%APPDATA%\auryx-agent\config.toml`
 
-### Available Options
+### Multi-Provider Setup
 
 ```toml
-[yellowfire]
-api_key = "your_key"          # Required: YellowFire API key
+# Choose provider: yellowfire, openai, anthropic, google, groq, vercel
+provider = "yellowfire"
+default_model = "command-a"
 
-[agent]
-default_model = "gpt-4o-mini" # Default AI model
-assistant_name = "Auryx"      # Assistant name
-temperature = 0.7             # Response creativity (0.0-1.0)
-system_prompt = ""            # Custom system prompt
+[api_keys]
+yellowfire = "your_key"  # Get: https://t.me/GPT4_Unlimit_bot?start=api
+openai = ""              # Get: https://platform.openai.com/api-keys
+anthropic = ""           # Get: https://console.anthropic.com/
+google = ""              # Get: https://makersuite.google.com/app/apikey
+groq = ""                # Get: https://console.groq.com/keys
+vercel = ""              # Get: https://sdk.vercel.ai/
+
+[ai]
+assistant_name = "Auryx"
+temperature = 0.7
+system_prompt = ""
 ```
+
+**📖 Full documentation**: [PROVIDERS.md](PROVIDERS.md) | [PROVIDERS.en.md](PROVIDERS.en.md)
 
 ## 💰 Pricing
 

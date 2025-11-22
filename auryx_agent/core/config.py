@@ -18,11 +18,17 @@ class Config:
     """Configuration for Auryx Agent.
     
     Attributes:
+        provider: AI provider to use (yellowfire, openai, anthropic, google, groq, vercel)
         default_model: Default AI model to use
         fallback_model: Fallback model if primary is unavailable
         theme: UI theme (dark, light)
         auto_update: Enable automatic updates
         yellowfire_api_key: YellowFire API key
+        openai_api_key: OpenAI API key
+        anthropic_api_key: Anthropic API key
+        google_api_key: Google API key
+        groq_api_key: Groq API key
+        vercel_api_key: Vercel API key
         default_timeout: Default timeout for network operations in seconds
         max_history_entries: Maximum number of history entries to keep
         show_spinners: Show animated spinners during operations
@@ -34,11 +40,17 @@ class Config:
         system_prompt: Custom system prompt for AI behavior
         temperature: Temperature for AI generation (0.0-2.0)
     """
-    default_model: str = "gpt-4o-mini"
-    fallback_model: str = "gpt-3.5-turbo"
+    provider: str = "yellowfire"
+    default_model: str = "command-a"
+    fallback_model: str = "gpt-4o-mini"
     theme: str = "dark"
     auto_update: bool = True
     yellowfire_api_key: str = ""
+    openai_api_key: str = ""
+    anthropic_api_key: str = ""
+    google_api_key: str = ""
+    groq_api_key: str = ""
+    vercel_api_key: str = ""
     default_timeout: int = 5
     max_history_entries: int = 1000
     show_spinners: bool = True
@@ -63,11 +75,16 @@ def create_default_config() -> None:
     
     default_config_content = """# Auryx Agent Configuration
 
-# Default AI model to use (see YellowFire API docs for available models)
-default_model = "gpt-4o-mini"
+# AI Provider Selection
+# Available: yellowfire, openai, anthropic, google, groq, vercel
+provider = "yellowfire"
+
+# Default AI model to use
+# command-a is the fastest model (2.04s average response time)
+default_model = "command-a"
 
 # Fallback model if primary is unavailable
-fallback_model = "gpt-3.5-turbo"
+fallback_model = "gpt-4o-mini"
 
 # UI theme (dark, light)
 theme = "dark"
@@ -75,11 +92,25 @@ theme = "dark"
 # Enable automatic updates
 auto_update = true
 
-# YellowFire API Key
-# Get your free API key: https://t.me/YellowFireBot -> /get_api
-# Free balance: $1
+# API Keys for different providers
 [api_keys]
+# YellowFire - Get free $1: https://t.me/GPT4_Unlimit_bot?start=api
 yellowfire = ""
+
+# OpenAI - https://platform.openai.com/api-keys
+openai = ""
+
+# Anthropic - https://console.anthropic.com/
+anthropic = ""
+
+# Google AI Studio - https://makersuite.google.com/app/apikey
+google = ""
+
+# Groq - https://console.groq.com/keys
+groq = ""
+
+# Vercel AI SDK - https://sdk.vercel.ai/
+vercel = ""
 
 # Network settings
 [network]
@@ -147,12 +178,19 @@ def load_config() -> Config:
             data = tomllib.load(f)
         
         # Extract values with defaults
+        api_keys = data.get("api_keys", {})
         config = Config(
-            default_model=data.get("default_model", "gpt-4o-mini"),
-            fallback_model=data.get("fallback_model", "gpt-3.5-turbo"),
+            provider=data.get("provider", "yellowfire"),
+            default_model=data.get("default_model", "command-a"),
+            fallback_model=data.get("fallback_model", "gpt-4o-mini"),
             theme=data.get("theme", "dark"),
             auto_update=data.get("auto_update", True),
-            yellowfire_api_key=data.get("api_keys", {}).get("yellowfire", ""),
+            yellowfire_api_key=api_keys.get("yellowfire", ""),
+            openai_api_key=api_keys.get("openai", ""),
+            anthropic_api_key=api_keys.get("anthropic", ""),
+            google_api_key=api_keys.get("google", ""),
+            groq_api_key=api_keys.get("groq", ""),
+            vercel_api_key=api_keys.get("vercel", ""),
             default_timeout=data.get("network", {}).get("default_timeout", 5),
             max_history_entries=data.get("history", {}).get("max_entries", 1000),
             show_spinners=data.get("output", {}).get("show_spinners", True),
@@ -182,6 +220,11 @@ def validate_config(config: Config) -> None:
     Raises:
         ValueError: If any configuration value is invalid
     """
+    # Validate provider
+    valid_providers = ["yellowfire", "openai", "anthropic", "google", "groq", "vercel"]
+    if config.provider not in valid_providers:
+        raise ValueError(f"Invalid provider '{config.provider}'. Must be one of: {', '.join(valid_providers)}")
+    
     # Validate theme
     valid_themes = ["dark", "light"]
     if config.theme not in valid_themes:

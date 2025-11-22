@@ -2,6 +2,41 @@
 
 All notable changes to Auryx Agent will be documented in this file.
 
+## [0.2.1] - 2024-11-22
+
+### 🌐 Multi-Provider Support
+
+#### Added
+- **6 AI Providers**: YellowFire, OpenAI, Anthropic, Google (Gemini), Groq, Vercel
+- **Provider Factory**: Unified interface for all AI providers
+- **Flexible Configuration**: Easy provider switching in config file
+- **Optional Dependencies**: Install only the providers you need
+- **Backward Compatibility**: Old configs continue to work
+
+#### New Files
+- `auryx_agent/core/providers/` - Provider implementations
+- `PROVIDERS.md` - Comprehensive provider documentation (Russian)
+- `PROVIDERS.en.md` - Provider documentation (English)
+- `MIGRATION.md` - Migration guide for existing users
+
+#### Configuration Changes
+- New `provider` field to select AI provider
+- Restructured API keys under `[api_keys]` section
+- Support for multiple API keys simultaneously
+
+#### Installation
+```bash
+# Install specific providers
+pip install openai anthropic google-generativeai groq
+
+# Or install all at once
+pip install auryx-agent[all-providers]
+```
+
+See [PROVIDERS.md](PROVIDERS.md) for detailed documentation.
+
+---
+
 ## [0.2.0] - 2024-11-21
 
 ### 🎉 Major Features Added

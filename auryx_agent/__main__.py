@@ -114,12 +114,93 @@ def print_model_suggestions(partial: str = "", max_suggestions: int = 10):
     print("💡 Полный список: auryx-agent models list")
 
 
+def list_provider_models(provider_name: str):
+    """List models available for a specific provider.
+    
+    Args:
+        provider_name: Name of the provider (yellowfire, google, groq)
+    """
+    from auryx_agent.core.model_parser import get_provider_models, validate_provider
+    
+    provider_name = provider_name.lower()
+    
+    if not validate_provider(provider_name):
+        print(f"\n❌ Неизвестный провайдер: {provider_name}")
+        print("\n💡 Доступные провайдеры:")
+        print("  • yellowfire - все модели (50+)")
+        print("  • google     - Google AI модели")
+        print("  • groq       - Groq модели")
+        return
+    
+    models = get_provider_models(provider_name)
+    
+    print("\n" + "=" * 70)
+    print(f"📋 Модели провайдера {provider_name.upper()} ({len(models)})")
+    print("=" * 70)
+    
+    if provider_name == "yellowfire":
+        print("\n💡 YellowFire предоставляет доступ ко всем моделям через единый API")
+        print("   Используйте: auryx-agent --model <model_name>")
+        print("\n" + "=" * 70)
+        
+        # Group by provider for YellowFire
+        gpt_models = [m for m in models if m.startswith(("gpt", "o1", "o3", "o4"))]
+        claude_models = [m for m in models if m.startswith("claude")]
+        gemini_models = [m for m in models if m.startswith("gemini")]
+        deepseek_models = [m for m in models if m.startswith("deepseek")]
+        grok_models = [m for m in models if m.startswith("grok")]
+        other_models = [m for m in models 
+                       if not any(m.startswith(p) for p in ["gpt", "o1", "o3", "o4", "claude", "gemini", "deepseek", "grok"])]
+        
+        if gpt_models:
+            print(f"\n🤖 GPT/OpenAI модели ({len(gpt_models)}):")
+            for model in gpt_models:
+                print(f"  • {model}")
+        
+        if claude_models:
+            print(f"\n🧠 Claude модели ({len(claude_models)}):")
+            for model in claude_models:
+                print(f"  • {model}")
+        
+        if gemini_models:
+            print(f"\n💎 Gemini модели ({len(gemini_models)}):")
+            for model in gemini_models:
+                print(f"  • {model}")
+        
+        if deepseek_models:
+            print(f"\n🔍 DeepSeek модели ({len(deepseek_models)}):")
+            for model in deepseek_models:
+                print(f"  • {model}")
+        
+        if grok_models:
+            print(f"\n🚀 Grok модели ({len(grok_models)}):")
+            for model in grok_models:
+                print(f"  • {model}")
+        
+        if other_models:
+            print(f"\n🌟 Другие модели ({len(other_models)}):")
+            for model in other_models:
+                print(f"  • {model}")
+    else:
+        # For other providers, show direct API usage
+        print(f"\n💡 Используйте: auryx-agent --model {provider_name}:<model_name>")
+        print(f"   Пример: auryx-agent --model {provider_name}:{models[0] if models else 'model'}")
+        print("\n" + "=" * 70)
+        
+        for model in models:
+            print(f"  • {model}")
+    
+    print("\n" + "=" * 70)
+
+
 def list_all_models():
     """List all available models grouped by provider."""
     all_models = YellowFireClient.AVAILABLE_MODELS
     
     print("\n" + "=" * 70)
-    print(f"📋 Все доступные модели ({len(all_models)})")
+    print(f"📋 Все модели YellowFire ({len(all_models)})")
+    print("=" * 70)
+    print("\n💡 YellowFire - доступ ко всем моделям через единый API")
     print("=" * 70)
     
     # Group by provider
@@ -170,12 +251,14 @@ def create_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  auryx-agent                          # Start in chat mode
-  auryx-agent --model claude-3.5-sonnet  # Start with specific model
-  auryx-agent models list              # List all available models
-  auryx-agent models search gpt        # Search for models
-  auryx-agent ping google.com          # Direct command mode
-  auryx-agent balance                  # Check account balance
+  auryx-agent                                    # Start in chat mode (YellowFire)
+  auryx-agent --model gpt-4o-mini                # Use model via YellowFire
+  auryx-agent --model openai:gpt-4o              # Use OpenAI API directly
+  auryx-agent --model anthropic:claude-3-5-sonnet # Use Anthropic API directly
+  auryx-agent models list                        # List all available models
+  auryx-agent models search gpt                  # Search for models
+  auryx-agent ping google.com                    # Direct command mode
+  auryx-agent balance                            # Check account balance
   
 For more information, visit: https://github.com/Badim41/network_tools
         """
@@ -184,7 +267,8 @@ For more information, visit: https://github.com/Badim41/network_tools
     parser.add_argument(
         "--model",
         type=str,
-        help="AI model to use (e.g., gpt-4o-mini, claude-3.5-sonnet). Use 'models list' to see all available models."
+        help="AI model to use. Format: 'model' (YellowFire) or 'provider:model' (direct API). "
+             "Examples: gpt-4o-mini, openai:gpt-4o, anthropic:claude-3-5-sonnet"
     )
     
     parser.add_argument(
@@ -209,6 +293,16 @@ For more information, visit: https://github.com/Badim41/network_tools
     # models search
     search_parser = models_subparsers.add_parser("search", help="Search for models")
     search_parser.add_argument("query", type=str, help="Search query (e.g., 'gpt', 'claude')")
+    
+    # models provider
+    provider_parser = models_subparsers.add_parser("provider", help="List models for specific provider")
+    provider_parser.add_argument("provider", type=str, help="Provider name (yellowfire, google, groq)")
+    
+    # models test
+    test_parser = models_subparsers.add_parser("test", help="Test models from provider")
+    test_parser.add_argument("provider", type=str, help="Provider name (yellowfire, google, groq)")
+    test_parser.add_argument("--prompt", type=str, default="Что такое Python? Ответь кратко в 1-2 предложениях.", 
+                           help="Test prompt")
     
     # Network commands
     ping_parser = subparsers.add_parser("ping", help="Ping a host")
@@ -236,22 +330,40 @@ def main():
     """Main entry point for CLI."""
     parser = create_parser()
     
-    # Special handling for --model without value or with invalid value
+    # Parse model specification if provided
+    model_spec = None
     if "--model" in sys.argv:
+        from auryx_agent.core.model_parser import parse_model_spec
+        
         model_index = sys.argv.index("--model")
         
         # Check if there's a value after --model
         if model_index + 1 >= len(sys.argv) or sys.argv[model_index + 1].startswith("-"):
             print("\n❌ Ошибка: --model требует указания имени модели")
+            print("\n💡 Форматы:")
+            print("  • model_name         → YellowFire (все модели)")
+            print("  • google:model_name  → Google AI API")
+            print("  • groq:model_name    → Groq API")
             print_model_suggestions()
             sys.exit(1)
         
         model_value = sys.argv[model_index + 1]
         
-        # Check if model is valid
-        if model_value not in YellowFireClient.AVAILABLE_MODELS:
-            print(f"\n❌ Ошибка: Модель '{model_value}' не найдена")
-            print_model_suggestions(model_value)
+        # Parse model specification
+        try:
+            model_spec = parse_model_spec(model_value)
+            
+            # No provider prefix = YellowFire (check if model exists)
+            if model_spec.provider is None:
+                if model_spec.model not in YellowFireClient.AVAILABLE_MODELS:
+                    print(f"\n❌ Ошибка: Модель '{model_spec.model}' не найдена в YellowFire")
+                    print_model_suggestions(model_spec.model)
+                    sys.exit(1)
+            else:
+                # Explicit provider specified (openai:, anthropic:, etc.)
+                print(f"\n✓ Будет использован {model_spec.provider.upper()} API для модели {model_spec.model}")
+        except ValueError as e:
+            print(f"\n❌ Ошибка: {e}")
             sys.exit(1)
     
     args = parser.parse_args()
@@ -264,16 +376,20 @@ def main():
         elif args.models_command == "search":
             print_model_suggestions(args.query, max_suggestions=50)
             sys.exit(0)
+        elif args.models_command == "provider":
+            list_provider_models(args.provider)
+            sys.exit(0)
         else:
             print("\n💡 Используйте:")
-            print("  auryx-agent models list          # Показать все модели")
-            print("  auryx-agent models search <query> # Поиск моделей")
+            print("  auryx-agent models list              # Показать все модели YellowFire")
+            print("  auryx-agent models search <query>    # Поиск моделей")
+            print("  auryx-agent models provider <name>   # Модели конкретного провайдера")
             sys.exit(0)
     
     # Handle chat subcommand
     if args.command == "chat":
         from auryx_agent.cli.simple_chat import simple_chat
-        sys.exit(simple_chat())
+        sys.exit(simple_chat(model_spec))
     
     # Handle balance command
     if args.command == "balance":
@@ -407,7 +523,7 @@ def main():
     
     # Default: start chat mode
     from auryx_agent.cli.simple_chat import simple_chat
-    sys.exit(simple_chat())
+    sys.exit(simple_chat(model_spec))
 
 
 if __name__ == "__main__":

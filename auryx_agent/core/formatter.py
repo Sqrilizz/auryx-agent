@@ -325,38 +325,91 @@ class Formatter:
         frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
         return f"{self.colors.BRIGHT_CYAN}{frames[frame % len(frames)]}{self.colors.RESET}"
     
+    def highlight_code(self, code: str, language: str = "") -> str:
+        """Highlight code with syntax highlighting using Rich library.
+        
+        Args:
+            code: Code to highlight
+            language: Programming language
+            
+        Returns:
+            Highlighted code with ANSI colors
+        """
+        try:
+            from rich.syntax import Syntax
+            from rich.console import Console
+            from io import StringIO
+            
+            if not language:
+                language = "python"
+            
+            syntax = Syntax(
+                code,
+                language,
+                theme="monokai",
+                line_numbers=True,
+                word_wrap=False,
+                background_color="default",
+                indent_guides=False
+            )
+            
+            string_io = StringIO()
+            console = Console(file=string_io, force_terminal=True, width=100, legacy_windows=False)
+            console.print(syntax)
+            result = string_io.getvalue()
+            
+            return result
+        except Exception:
+            lang_display = language or 'code'
+            border_top = f"{self.colors.BRIGHT_BLACK}┌─ {self.colors.BRIGHT_CYAN}{lang_display}{self.colors.BRIGHT_BLACK} ─┐{self.colors.RESET}"
+            border_bottom = f"{self.colors.BRIGHT_BLACK}└{'─' * (len(lang_display) + 5)}┘{self.colors.RESET}"
+            code_lines = code.split('\n')
+            formatted_code = '\n'.join(f"{self.colors.BRIGHT_YELLOW}{line}{self.colors.RESET}" for line in code_lines)
+            return f"{border_top}\n{formatted_code}\n{border_bottom}"
+    
     def render_markdown(self, text: str) -> str:
-        """Render simple markdown formatting in terminal.
+        """Render markdown formatting in terminal with syntax highlighting.
         
         Args:
             text: Text with markdown
             
         Returns:
-            Formatted text with ANSI colors
+            Formatted text with ANSI colors and syntax highlighting
         """
         import re
         
-        # Remove LaTeX formulas ($$...$$)
+        # Remove LaTeX formulas
         text = re.sub(r'\$\$[^$]+\$\$', '', text)
         text = re.sub(r'\$[^$]+\$', '', text)
+        
+        # Code blocks with syntax highlighting: ```language\ncode\n```
+        def replace_code_block(match):
+            language = match.group(1) or ""
+            code = match.group(2).strip()
+            return "\n" + self.highlight_code(code, language) + "\n"
+        
+        text = re.sub(r'```(\w*)\n(.*?)```', replace_code_block, text, flags=re.DOTALL)
         
         # Bold: **text** or __text__
         text = re.sub(r'\*\*(.+?)\*\*', f'{self.colors.BOLD}\\1{self.colors.RESET}', text)
         text = re.sub(r'__(.+?)__', f'{self.colors.BOLD}\\1{self.colors.RESET}', text)
         
-        # Italic: *text* or _text_
-        text = re.sub(r'\*(.+?)\*', f'{self.colors.DIM}\\1{self.colors.RESET}', text)
-        text = re.sub(r'_(.+?)_', f'{self.colors.DIM}\\1{self.colors.RESET}', text)
+        # Italic: *text* or _text_ (but not in URLs or paths)
+        text = re.sub(r'(?<![\w/])\*([^\*]+?)\*(?![\w/])', f'{self.colors.DIM}\\1{self.colors.RESET}', text)
+        text = re.sub(r'(?<![\w/])_([^_]+?)_(?![\w/])', f'{self.colors.DIM}\\1{self.colors.RESET}', text)
         
         # Inline code: `code`
-        text = re.sub(r'`(.+?)`', f'{self.colors.BRIGHT_YELLOW}\\1{self.colors.RESET}', text)
+        text = re.sub(r'`([^`]+?)`', f'{self.colors.BG_BLACK}{self.colors.BRIGHT_YELLOW} \\1 {self.colors.RESET}', text)
         
-        # Headers: ## Header
-        text = re.sub(r'^### (.+)$', f'{self.colors.BRIGHT_CYAN}\\1{self.colors.RESET}', text, flags=re.MULTILINE)
-        text = re.sub(r'^## (.+)$', f'{self.colors.BRIGHT_BLUE}{self.colors.BOLD}\\1{self.colors.RESET}', text, flags=re.MULTILINE)
-        text = re.sub(r'^# (.+)$', f'{self.colors.BRIGHT_MAGENTA}{self.colors.BOLD}\\1{self.colors.RESET}', text, flags=re.MULTILINE)
+        # Headers
+        text = re.sub(r'^### (.+)$', f'\n{self.colors.BRIGHT_CYAN}▸ \\1{self.colors.RESET}', text, flags=re.MULTILINE)
+        text = re.sub(r'^## (.+)$', f'\n{self.colors.BRIGHT_BLUE}{self.colors.BOLD}▸▸ \\1{self.colors.RESET}', text, flags=re.MULTILINE)
+        text = re.sub(r'^# (.+)$', f'\n{self.colors.BRIGHT_MAGENTA}{self.colors.BOLD}▸▸▸ \\1{self.colors.RESET}', text, flags=re.MULTILINE)
         
         # Lists: - item or * item
         text = re.sub(r'^[\-\*] (.+)$', f'{self.colors.BRIGHT_GREEN}•{self.colors.RESET} \\1', text, flags=re.MULTILINE)
+        
+        # Numbered lists: 1. item
+        text = re.sub(r'^(\d+)\. (.+)$', f'{self.colors.BRIGHT_CYAN}\\1.{self.colors.RESET} \\2', text, flags=re.MULTILINE)
         
         return text

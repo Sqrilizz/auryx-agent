@@ -1,8 +1,19 @@
-"""YellowFire API client using official network_tools library."""
+"""YellowFire API client using official network_tools library.
+
+DEPRECATED: This module is kept for backward compatibility.
+Use auryx_agent.core.providers instead.
+"""
 
 from dataclasses import dataclass
 from typing import List, Optional
 from network_tools import NetworkToolsAPI, GptModels
+
+import warnings
+warnings.warn(
+    "YellowFireClient is deprecated. Use auryx_agent.core.providers.YellowFireProvider instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 
 @dataclass
@@ -115,6 +126,10 @@ class YellowFireClient:
             )
             
             generated_text = response.response.text
+            
+            # Remove <think>...</think> blocks (debug output from some models)
+            import re
+            generated_text = re.sub(r'<think>.*?</think>', '', generated_text, flags=re.DOTALL).strip()
             
             # Update chat history
             if use_history:

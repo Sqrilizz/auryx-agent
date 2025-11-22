@@ -21,7 +21,7 @@
 - [x] **Git integration** - работа с git (status, diff)
 - [ ] **Multi-file editing** - редактирование нескольких файлов
 - [x] **Code templates** - шаблоны для разных языков (Python, Flask, FastAPI, CLI)
-- [ ] **Syntax highlighting** - подсветка кода в терминале
+- [x] **Syntax highlighting** - подсветка кода в терминале (Rich + Monokai theme)
 
 ### 2. Работа с файлами
 - [ ] **PDF support** - чтение и анализ PDF
