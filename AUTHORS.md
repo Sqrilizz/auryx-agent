@@ -21,7 +21,7 @@
 **YellowFire API**
 - Website: [yellowfire.ru](https://yellowfire.ru)
 - Telegram: [@GPT4_Unlimit_bot](https://t.me/GPT4_Unlimit_bot?start=_tgr_cx9gRXplYjQ0)
-- Contribution: Free API access to 50+ AI models
+- Contribution: Free API access to 50+ AI models for testing and personal use
 
 ## How to Contribute
 
